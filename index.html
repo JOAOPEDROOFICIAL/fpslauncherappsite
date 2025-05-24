@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - FPS Launcher</title>
+  <link rel="icon" href="icone-fps.ico" />
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif;}
+    body {
+      background: #0a0a0a; color: #ccc; display: flex; justify-content: center; align-items: center;
+      height: 100vh; padding: 20px;
+    }
+    .container {
+      background: #111; border: 1px solid #222; border-radius: 16px; padding: 40px 30px;
+      width: 100%; max-width: 400px; text-align: center; box-shadow: 0 0 20px rgba(85,255,153,0.1);
+      animation: fadeIn 0.8s ease-in;
+    }
+    h1 {color: #55ff99; margin-bottom: 20px;}
+    input {
+      width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333;
+      border-radius: 8px; background: #1a1a1a; color: #ccc; font-size: 1rem;
+    }
+    input:focus {outline: none; border-color: #55ff99;}
+    button {
+      width: 100%; padding: 12px; margin-top: 10px; background: #55ff99; color: #000;
+      border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.3s;
+    }
+    button:hover {background: #66ffaa;}
+    .switch {margin-top: 20px; color: #888; cursor: pointer; font-size: 0.9rem;}
+    .notif {
+      background: #1f1f1f; padding: 12px; margin-top: 10px; color: #55ff99;
+      border: 1px solid #333; border-radius: 8px; display: none;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1 id="title">Login FPS Launcher</h1>
+    <input type="email" id="email" placeholder="Seu e-mail" />
+    <input type="password" id="senha" placeholder="Sua senha" />
+    <button onclick="entrar()">Entrar</button>
+    <div class="switch" onclick="alternarModo()">Não tem conta? Criar agora</div>
+    <div class="notif" id="notif"></div>
+  </div>
+
+  <script>
+    let modoCadastro = false;
+
+    window.onload = () => {
+      const users = JSON.parse(localStorage.getItem("fps_users")) || {};
+      const email = localStorage.getItem("fps_last_email");
+      if (email && users[email]) {
+        document.getElementById('email').value = email;
+      }
+    };
+
+    function alternarModo() {
+      modoCadastro = !modoCadastro;
+      document.getElementById('title').textContent = modoCadastro ? "Criar Conta" : "Login FPS Launcher";
+      document.querySelector("button").textContent = modoCadastro ? "Cadastrar" : "Entrar";
+      document.querySelector(".switch").textContent = modoCadastro ? "Já tem conta? Entrar" : "Não tem conta? Criar agora";
+      document.getElementById('notif').style.display = 'none';
+    }
+
+    function entrar() {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const notif = document.getElementById('notif');
+
+      if (!email || !senha) {
+        showNotif("Preencha todos os campos.", true);
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem("fps_users")) || {};
+
+      if (modoCadastro) {
+        if (users[email]) {
+          showNotif("Este e-mail já está cadastrado.", true);
+          return;
+        }
+        users[email] = senha;
+        localStorage.setItem("fps_users", JSON.stringify(users));
+        localStorage.setItem("fps_last_email", email);
+        showNotif("✅ Você criou uma conta na FPS Launcher App!");
+        setTimeout(() => { alternarModo(); }, 2000);
+      } else {
+        if (!users[email] || users[email] !== senha) {
+          showNotif("E-mail ou senha inválidos.", true);
+          return;
+        }
+        localStorage.setItem("fps_last_email", email);
+        showNotif("✅ Você fez login com FPS Launcher!");
+        setTimeout(() => {
+          window.location.href = "installer.html";
+        }, 2000);
+      }
+    }
+
+    function showNotif(texto, erro = false) {
+      const notif = document.getElementById('notif');
+      notif.textContent = texto;
+      notif.style.color = erro ? "#ff6666" : "#55ff99";
+      notif.style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
